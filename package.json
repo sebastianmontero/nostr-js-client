@@ -1,13 +1,13 @@
 {
   "name": "@smontero/nostr-js-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "nostr javascript client",
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",
-    "clean-build": "rm -rf dist && npm run build",
+    "clean:build": "rm -rf dist && npm run build",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "prepare": "npm run clean-build",
+    "prepare": "npm run clean:build",
     "test": "jest"
   },
   "author": "Sebastian",

@@ -7,6 +7,11 @@ import {
 } from 'nostr-tools'
 
 import {
+  JSONEvent
+} from './types'
+
+import {
+  FilterBuilder,
   filterBuilder
 } from './util'
 
@@ -91,20 +96,17 @@ export class NostrClient {
    * @param {string[]} publicKeys
    * @returns {Promise<Map<String, Event<number>>>} 
    * @example
-   * const metadataEvents = await getMetadataEvents(['publicKey1', 'publicKey2']);
+   * const metadataEvents = await findMetadataEvents(['publicKey1', 'publicKey2']);
    */
-  async getMetadataEvents(publicKeys: string[]): Promise<Map<String, Event<number>>> {
+  async findMetadataEvents(publicKeys: string[]): Promise<Map<String, JSONEvent<number>>> {
     console.log(publicKeys)
-    const metadataFilter = filterBuilder()
-      .kinds(0)
-      // .authors(publicKeys)
-      .toFilters()
-    console.log("filter: ", metadataFilter)
-    const metadataEvents = await this.list([])
-    console.log("metadataEvents: ", metadataEvents)
+    const filter = this.getMetadataFilter(publicKeys).toFilters()
+    console.log("filter: ", filter)
+    const events = await this.list(filter)
+    console.log("metadataEvents: ", events)
     const profiles = new Map<String, Event<number>>()
-    for(const metadataEvent of metadataEvents){
-      profiles.set(metadataEvent.pubkey, metadataEvent)
+    for(const e of events){
+      profiles.set(e.pubkey, this.parseJSONContent(e))
     }
     return profiles
   }
@@ -116,12 +118,25 @@ export class NostrClient {
    * @param {string} publicKey 
    * @returns {Promise<Event<number>|undefined>}
    * @example
-   * const metadataEvent = await getMetadataEvent('publicKey1');
+   * const metadataEvent = await findMetadataEvent('publicKey1');
    */
-  async getMetadataEvent(publicKey: string): Promise<Event<number>|undefined> {
-    let metadataEvents = await this.getMetadataEvents([publicKey])
-    console.log("metadataEvents2: ", metadataEvents)
-    return metadataEvents.get(publicKey)
+  async findMetadataEvent(publicKey: string): Promise<JSONEvent<number>|null> {
+    const filter = this.getMetadataFilter(publicKey).toFilter()
+    console.log("filter: ", filter)
+    const event = await this.get(filter)
+    console.log("event: ", event)
+    return event ? this.parseJSONContent(event) : null
+  }
+
+  private getMetadataFilter(publicKeys: string | string[]): FilterBuilder<number> {
+    return filterBuilder()
+    .kinds(0)
+    .authors(publicKeys)
+  }
+
+  private parseJSONContent(event: Event<number>): JSONEvent<number> {
+    event.content = JSON.parse(event.content)
+    return event
   }
 
 }
