@@ -1,6 +1,6 @@
 {
   "name": "@smontero/nostr-js-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "nostr javascript client",
   "main": "dist/index.js",
   "scripts": {
