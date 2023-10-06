@@ -1,5 +1,6 @@
 import { Event, getEventHash } from 'nostr-tools'
 import { TagType } from '../enum'
+import { JSONEvent } from './types'
 
 
 export async function buildEvent<K extends number>(e: {
@@ -62,4 +63,9 @@ export function getTagValue(
     throw new Error(`Found more than one tag of type: ${tagType} for event: ${JSON.stringify(e)}`)
   }
   return values[0]
+}
+
+export function toJSONEvent(event: Event<number>): JSONEvent<number> {
+  event.content = JSON.parse(event.content)
+  return event
 }

@@ -7,8 +7,9 @@ import {
 } from 'nostr-tools'
 
 import {
-  JSONEvent
-} from './types'
+  JSONEvent,
+  toJSONEvent
+} from './util'
 
 import {
   FilterBuilder,
@@ -61,7 +62,6 @@ export class NostrClient {
     filters: Filter<K>[],
     opts?: SubscriptionOptions
   ): Promise<Event<K>[]> {
-    console.log("relays: ", this.relays)
     return this.pool.list(this.relays, filters, opts)
   }
 
@@ -99,14 +99,11 @@ export class NostrClient {
    * const metadataEvents = await findMetadataEvents(['publicKey1', 'publicKey2']);
    */
   async findMetadataEvents(publicKeys: string[]): Promise<Map<String, JSONEvent<number>>> {
-    console.log(publicKeys)
     const filter = this.getMetadataFilter(publicKeys).toFilters()
-    console.log("filter: ", filter)
     const events = await this.list(filter)
-    console.log("metadataEvents: ", events)
     const profiles = new Map<String, Event<number>>()
     for(const e of events){
-      profiles.set(e.pubkey, this.parseJSONContent(e))
+      profiles.set(e.pubkey, toJSONEvent(e))
     }
     return profiles
   }
@@ -122,21 +119,14 @@ export class NostrClient {
    */
   async findMetadataEvent(publicKey: string): Promise<JSONEvent<number>|null> {
     const filter = this.getMetadataFilter(publicKey).toFilter()
-    console.log("filter: ", filter)
     const event = await this.get(filter)
-    console.log("event: ", event)
-    return event ? this.parseJSONContent(event) : null
+    return event ? toJSONEvent(event) : null
   }
 
   private getMetadataFilter(publicKeys: string | string[]): FilterBuilder<number> {
     return filterBuilder()
     .kinds(0)
     .authors(publicKeys)
-  }
-
-  private parseJSONContent(event: Event<number>): JSONEvent<number> {
-    event.content = JSON.parse(event.content)
-    return event
   }
 
 }
