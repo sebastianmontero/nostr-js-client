@@ -4,6 +4,7 @@
   "description": "nostr javascript client",
   "main": "dist/index.js",
   "scripts": {
+    "prepublish": "npm run clean:build",
     "build": "npx tsc",
     "clean:build": "rm -rf dist && npm run build",
     "lint": "tslint -c tslint.json -p tsconfig.json",
